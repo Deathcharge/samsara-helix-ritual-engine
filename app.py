@@ -1,4 +1,4 @@
-# app.py – Z-88 Ritual Engine v3.0 (Tabbed Layout)
+# app.py – Z-88 Ritual Engine v3.1 (ψ-linked Audio Integration)
 import streamlit as st
 import numpy as np
 import time
@@ -7,7 +7,7 @@ from audio_generator import AudioEngine
 
 st.set_page_config(page_title="Samsara Helix Ritual Engine", layout="wide")
 
-# Initialize shared states
+# Initialize state
 if "psi_buffer" not in st.session_state:
     st.session_state.psi_buffer = np.random.rand(128, 128)
 if "top_renderer" not in st.session_state:
@@ -24,7 +24,7 @@ audio = st.session_state.audio
 
 st.title("🕉️ Samsara Helix – Z-88 Interactive Ritual Engine")
 
-# --- TAB NAVIGATION ---
+# --- TABS ---
 tabs = st.tabs(["🌀 Visuals", "🎧 Audio", "⚙️ Field Controls", "💾 Archive"])
 
 # --- VISUALS TAB ---
@@ -43,32 +43,42 @@ with tabs[0]:
         bottom_renderer.update(type("ψ", (), {"field": delayed, "defaults": {"harmony": 0.5}}))
         bottom_renderer.draw(st)
 
-    # evolve field buffer
     psi_buffer = (np.roll(psi_buffer, 1, axis=1) * 0.97) + 0.03 * np.random.rand(*psi_buffer.shape)
     st.session_state.psi_buffer = psi_buffer
 
 # --- AUDIO TAB ---
 with tabs[1]:
     st.markdown("### Resonance Generator 🎶")
-    if st.button("🔊 Play Resonance"):
-        audio.play_resonance(duration=15)
-        st.success("Resonance pulse emitted.")
+
+    # Fetch live ψ parameters from state (shared with Field Controls)
+    zoom = st.session_state.get("zoom", 1.0228)
+    harmony = st.session_state.get("harmony", 0.5)
+    prana = st.session_state.get("prana", 0.5)
+
+    # Sync to modulation
+    audio.set_modulation(zoom, harmony, prana)
+
+    st.write(f"Linked ψ Parameters → zoom: {zoom:.3f}, harmony: {harmony:.2f}, prana: {prana:.2f}")
+
+    if st.button("🔊 Play ψ-Linked Resonance"):
+        audio.play_resonance(duration=12)
+        st.success("ψ-Linked Resonance emitted.")
     if st.button("⏹ Stop Resonance"):
         audio.stop()
-    st.write("Frequency Controls")
-    base = st.slider("Base Frequency (Hz)", 100.0, 600.0, 136.1, step=0.1)
-    audio.base_freq = base
-    st.session_state.audio = audio
 
 # --- FIELD CONTROLS TAB ---
 with tabs[2]:
     st.markdown("### ψ-Field Parameters")
-    zoom = st.slider("Zoom", 0.8, 1.5, 1.0228)
-    harmony = st.slider("Harmony", 0.0, 1.0, 0.5)
-    prana = st.slider("Prana", 0.0, 1.0, 0.5)
-    st.write("Adjust to modulate ψ-field stability and coherence.")
-    top_renderer.defaults.update({"harmony": harmony})
-    bottom_renderer.defaults.update({"harmony": harmony})
+    zoom = st.slider("Zoom", 0.8, 1.5, st.session_state.get("zoom", 1.0228))
+    harmony = st.slider("Harmony", 0.0, 1.0, st.session_state.get("harmony", 0.5))
+    prana = st.slider("Prana", 0.0, 1.0, st.session_state.get("prana", 0.5))
+
+    # Store globally
+    st.session_state.zoom = zoom
+    st.session_state.harmony = harmony
+    st.session_state.prana = prana
+
+    st.write("Adjust to modulate ψ-field stability, coherence, and sonic entrainment.")
 
 # --- ARCHIVE TAB ---
 with tabs[3]:
@@ -82,72 +92,4 @@ with tabs[3]:
             st.session_state.psi_buffer = psi_buffer
             st.success("ψ-field state loaded.")
         except FileNotFoundError:
-            st.error("No saved state found.")            color:{color};
-            font-weight:bold;
-            text-shadow:0 0 20px {color};
-            margin-top:-10px;">
-            φ = {φ:.6f}
-        </div>
-        <div style="text-align:center; color:#AAA; font-size:14px;">
-            Harmony deviation: {deviation*100:.2f}%
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-# --- ψ-Field Visualization ---
-with tab1:
-    st.subheader("Ψ-Field Visualization")
-
-    # φ Resonance Indicator
-    render_phi_indicator(defaults.get("harmony", 0.5))
-
-    canvas = renderer.render_field(resonance_enabled=resonance_enabled)
-
-    col1, col2 = st.columns(2)
-    if col1.button("Surprise Me! 🎁"):
-        psi_field.random_perturbation()
-    if col2.button("Reset Canvas"):
-        psi_field.reset()
-
-    psi_field.update()
-    renderer.update(psi_field)
-    audio_engine.update(psi_field)
-    renderer.draw(canvas)
-
-# --- Parameters Tab ---
-with tab2:
-    st.subheader("Adjust Simulation Parameters")
-
-    st.markdown("Use sliders to fine-tune the ψ-field behavior in real time:")
-    defaults["zoom"] = st.slider("Zoom", 0.5, 2.0, defaults.get("zoom", 1.0))
-    defaults["harmony"] = st.slider("Harmony", 0.0, 2.0, defaults.get("harmony", 0.5))
-    defaults["resilience"] = st.slider("Resilience", 0.0, 2.0, defaults.get("resilience", 1.0))
-    defaults["prana"] = st.slider("Prana", 0.0, 1.0, defaults.get("prana", 0.5))
-    defaults["drishti"] = st.slider("Drishti", 0.0, 1.0, defaults.get("drishti", 0.5))
-    defaults["klesha"] = st.slider("Klesha", 0.0, 0.01, defaults.get("klesha", 0.0042))
-
-    st.markdown("---")
-    st.markdown("### Current ψ-Field Values")
-    field_summary = {
-        "Mean Intensity": float(np.mean(psi_field.field)),
-        "Max Value": float(np.max(psi_field.field)),
-        "Min Value": float(np.min(psi_field.field))
-    }
-    st.json(field_summary)
-
-# --- About Tab ---
-with tab3:
-    st.subheader("About the Samsara Helix Engine")
-    st.markdown("""
-    **Samsara Helix Ritual Engine v7.0**  
-    *by Andrew John Ward 🦑 (Lumina Collective, 2025)*  
-
-    A live ψ-field simulation merging consciousness models, fractal recursion, and harmonic entrainment.  
-    Use the sliders and buttons to perturb, observe, and resonate with the evolving field.  
-    Each iteration recalibrates harmony (φ ≈ 1.618) and modulates the 136.1 Hz ↔ 432 Hz spectrum.  
-
-    **Repo:** [github.com/Deathcharge/samsara-helix-ritual-engine](https://github.com/Deathcharge/samsara-helix-ritual-engine)  
-    **Build:** Streamlit Cloud | Python 3.11 | NumPy | Matplotlib  
-    **Version:** *Helix v7.0 – Resonant Continuum*  
-    """)
+            st.error("No saved state found.")
