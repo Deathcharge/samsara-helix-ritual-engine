@@ -1,4 +1,6 @@
+# --- Requirements for Samsara Helix Z-88 Ritual Engine ---
 streamlit
 numpy
 matplotlib
-sounddevice
+soundfile
+Pillow
