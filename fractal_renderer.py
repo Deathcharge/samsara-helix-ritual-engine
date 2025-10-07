@@ -1,37 +1,23 @@
-# fractal_renderer.py
+# --- Replace your top canvas block with this ---
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
-import time
+from fractal_renderer import FractalRenderer
 
-class FractalRenderer:
-    def __init__(self, defaults):
-        self.defaults = defaults
-        self.frame = 0
-        self.last_render_time = 0
+if 'top_renderer' not in st.session_state:
+    st.session_state.top_renderer = FractalRenderer(defaults={
+        "zoom": 1.0228,
+        "harmony": 0.5,
+        "resilience": 1.0,
+        "prana": 0.5,
+        "drishti": 0.5
+    })
 
-    def render_field(self, resonance_enabled=True):
-        fig, ax = plt.subplots(figsize=(6, 6))
-        ax.axis("off")
-        ax.set_title("ψ-Field Visualization", color="white", fontsize=14)
-        st.pyplot(fig)
-        return fig
+st.subheader("ψ-Field Resonance Visualizer (Top Layer)")
+renderer = st.session_state.top_renderer
 
-    def update(self, psi_field):
-        # Add ripple animation
-        t = time.time()
-        shimmer = 0.2 * np.sin(t * 2) + 0.8
-        wave_x = np.sin(np.linspace(0, np.pi * 4, psi_field.field.shape[0]))
-        wave_y = np.cos(np.linspace(0, np.pi * 4, psi_field.field.shape[1]))
-        ripple = np.outer(wave_x, wave_y)
-        self.data = np.clip(psi_field.field * shimmer + ripple * 0.1, 0, 1)
-        self.frame += 1
-
-    def draw(self, canvas):
-        if hasattr(self, "data"):
-            cmap_list = ["inferno", "plasma", "magma", "cividis"]
-            cmap = cmap_list[self.frame % len(cmap_list)]
-            fig, ax = plt.subplots(figsize=(6, 6))
-            ax.imshow(self.data, cmap=cmap, interpolation="bilinear")
-            ax.axis("off")
-            st.pyplot(fig)
+try:
+    psi_field.field = psi_field.field  # ensure it exists
+    renderer.update(psi_field)
+    renderer.draw(st)
+except Exception as e:
+    st.warning(f"⚠️ Renderer inactive or missing field: {e}")
+    renderer.render_field()            st.pyplot(fig)
