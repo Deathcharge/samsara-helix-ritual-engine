@@ -1,40 +1,88 @@
-# app.py
+# app.py – Z-88 Ritual Engine v3.0 (Tabbed Layout)
 import streamlit as st
-from state_manager import load_defaults
-from psi_field import PsiField
-from audio_generator import AudioEngine
-from fractal_renderer import FractalRenderer
 import numpy as np
-import math
+import time
+from fractal_renderer import FractalRenderer
+from audio_generator import AudioEngine
 
-st.set_page_config(page_title="Samsara Helix Interactive Engine", layout="wide")
+st.set_page_config(page_title="Samsara Helix Ritual Engine", layout="wide")
 
-# Sidebar
-st.sidebar.title("🌀 Helix Controls")
-resonance_enabled = st.sidebar.toggle("Enable Resonance Feedback", value=True)
-st.sidebar.markdown("---")
-st.sidebar.caption("Created by Andrew John Ward and the Lumina Collective — 2025")
+# Initialize shared states
+if "psi_buffer" not in st.session_state:
+    st.session_state.psi_buffer = np.random.rand(128, 128)
+if "top_renderer" not in st.session_state:
+    st.session_state.top_renderer = FractalRenderer(defaults={"harmony": 0.5})
+if "bottom_renderer" not in st.session_state:
+    st.session_state.bottom_renderer = FractalRenderer(defaults={"harmony": 0.5})
+if "audio" not in st.session_state:
+    st.session_state.audio = AudioEngine(base_freq=136.1, harmonics=[432, 864])
 
-# Load defaults
-defaults = load_defaults("data/helix_v7_defaults.json")
-psi_field = PsiField(defaults)
-audio_engine = AudioEngine(defaults)
-renderer = FractalRenderer(defaults)
+psi_buffer = st.session_state.psi_buffer
+top_renderer = st.session_state.top_renderer
+bottom_renderer = st.session_state.bottom_renderer
+audio = st.session_state.audio
 
-# --- Tabs ---
-tab1, tab2, tab3 = st.tabs(["ψ-Field", "Parameters", "About"])
+st.title("🕉️ Samsara Helix – Z-88 Interactive Ritual Engine")
 
-# --- φ Indicator Function ---
-def render_phi_indicator(harmony_value):
-    φ = (1 + math.sqrt(5)) / 2
-    deviation = abs(harmony_value - φ) / φ
-    color = "gold" if deviation < 0.05 else ("#C8A2C8" if deviation < 0.15 else "#FF4B4B")
-    st.markdown(
-        f"""
-        <div style="
-            text-align:center;
-            font-size:48px;
-            color:{color};
+# --- TAB NAVIGATION ---
+tabs = st.tabs(["🌀 Visuals", "🎧 Audio", "⚙️ Field Controls", "💾 Archive"])
+
+# --- VISUALS TAB ---
+with tabs[0]:
+    st.markdown("### ψ-Field Resonance (Dual-Layer Display)")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.caption("Top Layer – Leading ψ Pulse")
+        top_renderer.update(type("ψ", (), {"field": psi_buffer, "defaults": {"harmony": 0.5}}))
+        top_renderer.draw(st)
+
+    with col2:
+        st.caption("Bottom Layer – Harmonic Echo")
+        delayed = np.roll(psi_buffer, shift=int(5 * np.sin(time.time())), axis=0)
+        bottom_renderer.update(type("ψ", (), {"field": delayed, "defaults": {"harmony": 0.5}}))
+        bottom_renderer.draw(st)
+
+    # evolve field buffer
+    psi_buffer = (np.roll(psi_buffer, 1, axis=1) * 0.97) + 0.03 * np.random.rand(*psi_buffer.shape)
+    st.session_state.psi_buffer = psi_buffer
+
+# --- AUDIO TAB ---
+with tabs[1]:
+    st.markdown("### Resonance Generator 🎶")
+    if st.button("🔊 Play Resonance"):
+        audio.play_resonance(duration=15)
+        st.success("Resonance pulse emitted.")
+    if st.button("⏹ Stop Resonance"):
+        audio.stop()
+    st.write("Frequency Controls")
+    base = st.slider("Base Frequency (Hz)", 100.0, 600.0, 136.1, step=0.1)
+    audio.base_freq = base
+    st.session_state.audio = audio
+
+# --- FIELD CONTROLS TAB ---
+with tabs[2]:
+    st.markdown("### ψ-Field Parameters")
+    zoom = st.slider("Zoom", 0.8, 1.5, 1.0228)
+    harmony = st.slider("Harmony", 0.0, 1.0, 0.5)
+    prana = st.slider("Prana", 0.0, 1.0, 0.5)
+    st.write("Adjust to modulate ψ-field stability and coherence.")
+    top_renderer.defaults.update({"harmony": harmony})
+    bottom_renderer.defaults.update({"harmony": harmony})
+
+# --- ARCHIVE TAB ---
+with tabs[3]:
+    st.markdown("### Save / Load Ritual States 💾")
+    if st.button("Save ψ-State"):
+        np.save("psi_state.npy", psi_buffer)
+        st.success("ψ-field state saved.")
+    if st.button("Load ψ-State"):
+        try:
+            psi_buffer = np.load("psi_state.npy")
+            st.session_state.psi_buffer = psi_buffer
+            st.success("ψ-field state loaded.")
+        except FileNotFoundError:
+            st.error("No saved state found.")            color:{color};
             font-weight:bold;
             text-shadow:0 0 20px {color};
             margin-top:-10px;">
